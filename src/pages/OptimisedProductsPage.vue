@@ -1,21 +1,18 @@
 <script setup>
 import { ref } from "vue";
-import BoringTable from "@/components/BoringTable.vue";
-import ProductModal from "@/components/ProductModal.vue";
+import { useQuery } from "vue-query";
 
-const data = ref();
-const loading = ref(false);
+import BoringTable from "@/components/BoringTable.vue";
+import OptimisedProductModal from "@/components/OptimisedProductModal.vue";
 
 async function fetchData() {
-  loading.value = true;
-  const response = await fetch(
-    `https://dummyjson.com/products?limit=10`
-  ).then((res) => res.json());
-  data.value = response.products;
-  loading.value = false;
+  return await fetch(`https://dummyjson.com/products?limit=10`).then((res) => res.json());
 }
 
-fetchData();
+const { isLoading, data } = useQuery(
+  "products",
+  fetchData
+);
 
 const selectedProduct = ref();
 function onSelect(item) {
@@ -25,12 +22,12 @@ function onSelect(item) {
 
 <template>
   <div class="container">
-    <ProductModal
+    <OptimisedProductModal
       v-if="selectedProduct"
       :product-id="selectedProduct.id"
       @close="selectedProduct = null"
     />
-    <BoringTable :items="data" v-if="!loading" @select="onSelect" />
+    <BoringTable :items="data.products" v-if="!isLoading" @select="onSelect" />
   </div>
 </template>
 

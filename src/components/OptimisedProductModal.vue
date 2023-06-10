@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from "vue";
 import GridLoader from 'vue-spinner/src/GridLoader.vue'
+import { useQuery } from "vue-query";
 
 const props = defineProps({
   productId: {
@@ -14,24 +14,23 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
-const product = ref();
-const loading = ref(false);
 
 async function fetchProduct() {
-  loading.value = true;
-  const response = await fetch(
+  return await fetch(
     `https://dummyjson.com/products/${props.productId}`
   ).then((res) => res.json());
-  product.value = response;
-  loading.value = false;
 }
 
-fetchProduct();
+const { isLoading, data: product } = useQuery(
+  ["product", props.productId],
+  fetchProduct
+);
+
 </script>
 
 <template>
   <div class="modal">
-    <div class="modal__content" v-if="loading">
+    <div class="modal__content" v-if="isLoading">
       <GridLoader />
     </div>
     <div class="modal__content" v-else-if="product">
@@ -77,7 +76,6 @@ fetchProduct();
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  
   .modal__close {
     position: absolute;
     top: 10px;
